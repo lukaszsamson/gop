@@ -1,0 +1,45 @@
+'use strict';
+
+angular.module('chooseApp')
+  .controller('AskCtrl', ['$scope', '$upload', 'fileUpload', '$http', function ($scope, $upload, fileUpload, $http) {
+    $scope.stateName = 'ask';
+    $scope.images = [];
+    $scope.ids = [];
+    $scope.fr = {};
+    $scope.fileType = {};
+
+    $scope.onFileSelect = function ($files) {
+        var file = $files[0];
+
+        $scope.fr = new FileReader();
+        $scope.fr.onload = convertToImage;
+        $scope.fr.readAsBinaryString(file);
+        $scope.fileType = file.type;
+
+        $scope.upload = $upload.upload({
+            url: '../Api/file/upload', 
+            file: file,
+        }).progress(function (evt) {
+            console.log('percent: ' + parseInt(100.0 * evt.loaded / evt.total));
+        }).success(function (data, status, headers, config) {
+            $scope.ids.push(data.pickId);
+        });
+    };
+
+<<<<<<< HEAD
+    function convertToImage() {
+        var data = "data:" + $scope.fileType + ";base64," + btoa($scope.fr.result);
+        $scope.fileType = {};
+        $scope.images.push(data);
+    }
+=======
+    $scope.ask = function () {
+        $http.post('/Choose.Api/questions', {
+            pick1Id: $scope.ids[0],
+            pick2Id: $scope.ids[1]
+        }).success(function (data) {
+            alert(JSON.stringify(data));
+        });
+    };
+>>>>>>> Zapis pytania - ui spięty z api
+  }]);

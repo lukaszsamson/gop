@@ -1,0 +1,116 @@
+<div class="main-page" id="fullpage">
+	<div class="section section-1 active">
+		<div class="container">
+			<div class="row">
+				<div class="col-md-offset-2 col-md-8">
+					<div class="text-center">
+						<img class="main-logo" src="images/logo_pressed.png" />
+						<h1 class="text-shadow text-white"><em>for someone else</em></h1>
+						<a href="#pick" class="btn btn-block btn-primary btn-lg fb-login">Start your journey!</a>
+					</div>
+				</div>
+				<div class="text-centered">
+					<a class="btn btn-success start-to-pick go-down" title="Start picking"><span class="fui-triangle-down"></span></a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="section section-2">
+		<div class="container">
+			<div class="row">
+			 <div class="col-md-12 text-shadow text-center">
+					<h3 class="text-white no-top-margin">Take your Pick!</h3>
+					<p class="h3"><small>Help other people make up their minds.<br />All you have to do is one click!</small></p>
+					<div class="row  chose-fields">
+						<div class="col-md-6 col-xs-6">
+							<div class="item-holder no-top-margin">
+								<label class="image-radio" liquid="liquidConfiguration">
+									<input type="radio" name="pick" ng-click="select(p.pickId)"/>
+									<img src="images/cocacola.png" />
+								</label>
+							</div>
+						</div>
+						<div class="col-md-6 col-xs-6">
+							<div class="item-holder no-top-margin">
+								<label class="image-radio" liquid="liquidConfiguration">
+									<input type="radio" name="pick" ng-click="select(p.pickId)"/>
+									<img src="images/pepsi.png" />
+								</label>
+							</div>
+						</div>
+					</div>
+				</div> 
+				<div class="text-centered">
+					<a class="btn btn-success start-to-pick go-down" title="How does it work?"><span class="fui-triangle-down"></span></a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="section section-3">
+		<a class="btn btn-success start-to-pick go-up" title="Go back"><span class="fui-triangle-up"></span></a>
+		<div class="slide active">
+			<div class="background-white">
+				<div class="container">
+					<div class="row">
+						<div class="col-md-12 text-center text-shadow">
+							<span class="fui-question-circle large-icon"></span>
+							<!-- <div class="text-circle">1</div> -->
+							<h1 class="text-white">Have a dilemma what to Pick?</h1>
+							<h4 class="text-white">Find out what other people think! It's very simple!</h4>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="slide">
+			<div class="background-white">
+				<div class="container">
+					<div class="row">
+						<div class="col-md-12 text-center text-shadow">
+							<span class="fui-plus-circle large-icon" style="margin: 0 10px;"></span>
+							<span class="fui-plus-circle large-icon" style="margin: 0 10px;"></span>
+							<!-- <div class="text-circle">2</div> -->
+							<h1 class="text-white">Upload two images.</h1>
+							<h4 class="text-white">They will represent two options people can vote on.</h4>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="slide">
+			<div class="background-white">
+				<div class="container">
+					<div class="row">
+						<div class="col-md-12 text-center text-shadow">
+							<span class="fui-check-circle large-icon"></span>
+							<!-- <div class="text-circle">3</div> -->
+							<h1 class="text-white">Check out the results.</h1>
+							<h4 class="text-white">Maybe they will help you make your Pick!</h4>
+							<p><a  href="#pick"  class="btn btn-block btn-primary btn-lg fb-login">Start now!</a></p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div id="status">
+</div>
+<script>
+	$(document).ready(function() {
+
+		$('.go-down').click(function(e){
+			e.preventDefault();
+			$.fn.fullpage.moveSectionDown();
+		});
+
+		$('.go-up').click(function(e){
+			e.preventDefault();
+			$.fn.fullpage.moveSectionUp();
+		});
+
+		$('#fullpage').fullpage({
+			scrollingSpeed: 300
+		});
+	});
+</script>

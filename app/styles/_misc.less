@@ -1,0 +1,72 @@
+.text-shadow {
+    text-shadow: 0px -1px 2px rgba(0, 0, 0, 0.3);
+}
+.main {
+    display: table;
+    height: 100%;
+    width: 100%;
+}
+.content-row {
+    display: table-row;
+    height: 1px;
+}
+.content-row-expanded {
+    height: auto;
+}
+.navbar {
+    border-radius: 0;
+}
+@media (min-width: @screen-md-min) {
+    .navbar-search-input {
+        width: 300px!important;
+    }
+}
+.navbar-form .navbar-search-input:focus {
+    background: #fff;
+}
+
+
+.item-holder {
+    margin: 30px 0;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.13);
+    padding: 0px;
+    height: 350px;
+    background-color: rgba(245, 245, 245, 0.5);
+    border-radius: 3px;
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+        img {
+        max-width: 100%;
+        max-height: 100%;
+        border: 4px #494;
+        margin: auto;
+    }
+} 
+
+.btn-cta {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    position: relative;
+    top: -0px;
+    display: block;
+    margin: auto;
+    padding:0;
+}
+
+
+
+.SmallThumbnailContainer
+{
+    display: inline-block; position: relative;
+    float: left;    
+    width: 40px;
+    height: 40px;
+    border: 1px solid #ccc;
+    margin: 0px; padding: 0px;
+}
+.SmallThumbnailContainer { width: 40px; margin: 0px 10px 0px 0px; } 
+.SmallThumbnailContainer tr { height: 40px; text-align: center; }
+.SmallThumbnailContainer tr td { vertical-align: middle; position: relative; width: 40px;  }
+.SmallThumbnailContainer tr td img { overflow: hidden; max-height: 40px; max-width: 40px; vertical-align: middle; margin: -1px -1px 1px -1px; }

@@ -1,0 +1,20 @@
+{
+	"folders":
+	[
+		{
+			"follow_symlinks": true,
+			"path": "."
+		}
+	],
+	"settings":
+	{
+		"GoSublime":
+		{
+			"env":
+			{
+				"GOPATH": "C:/Users/durbat/go",
+				"HOME": "C:/Users/durbat"
+			}
+		}
+	}
+}

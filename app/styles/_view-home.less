@@ -1,0 +1,97 @@
+//Dropzone
+.dropzone {
+	.dropzone-label  {
+		position: absolute;
+		box-sizing: border-box;
+		border: 4px dashed #ccc;
+		padding: 100px 0 0;
+		margin: 3%;
+		height: 92%;
+		width: 94%;
+		strong {
+			font-size: 40px; font-weight: 200;
+		}
+		p {
+			
+			position: relative; 
+			margin: 10px 20% 15px; 
+			height:0;
+
+			span { position: relative; bottom: 15px; color: #888; 
+		font-size: 13px; font-weight: 200;
+		&:before,&:after { content: "";border-bottom: 1px #888 dashed; position: absolute;
+		 width: 80px; display: block; top: 50%;}
+				&:before { right: 20px; }
+				&:after { left: 20px; }
+			}
+		}
+		.custom-file-input { 
+			width: 74px;
+			height: 27px;
+			margin: auto;
+		}    	
+	}
+
+
+	&.ok { 
+		background-color:rgba(95, 245, 95, 0.5); padding: 5px;
+		.dropzone-label { display: none;
+
+		}
+	}
+}
+
+.custom-file-input::-webkit-file-upload-button { 
+	visibility: hidden;
+}
+.custom-file-input::before {
+	content: 'upload file';
+	display: inline-block;
+	background: #888;
+	color: #fff;
+
+	outline: none;
+	white-space: nowrap;
+	-webkit-user-select: none;
+	cursor: pointer;
+
+	padding: 6px 9px;
+	font-size: 12px;
+	line-height: 1.083;
+	border-radius: 3px;
+
+
+	font-weight: normal;
+	border: none;
+	-webkit-transition: border .25s linear, color .25s linear, background-color .25s linear;
+	transition: border .25s linear, color .25s linear, background-color .25s linear;
+	-webkit-font-smoothing: subpixel-antialiased;
+}
+.custom-file-input:hover::before {
+	border-color: black;
+}
+.custom-file-input:active::before {
+	background: -webkit-linear-gradient(top, #e3e3e3, #f9f9f9);
+}
+
+
+
+.btn-file {
+	position: relative;
+	overflow: hidden;
+}
+.btn-file input[type=file] {
+	position: absolute;
+	top: 0;
+	right: 0;
+	min-width: 100%;
+	min-height: 100%;
+	font-size: 100px;
+	text-align: right;
+	filter: alpha(opacity=0);
+	opacity: 0;
+	outline: none;
+	background: white;
+	cursor: inherit;
+	display: block;
+}

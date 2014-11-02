@@ -1,0 +1,36 @@
+<header role="navigation">
+    <div class="container">
+        <div class="row">
+            <a class="navbar-brand" href="#home">
+                <img src="images/logo_pressed_250.png" class="logo-small" />
+            </a>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="row" ng-if="!picks.length">
+        <div class="col-md-12">
+            <div class="palette palette-orange margin-top-bottom">
+                <h3 class="text-white text-shadow text-center">No picks at this time<br /><small>Try again later, or add your own</small></h3>
+            </div>
+        </div>
+    </div>
+    <div class="row chose-fields" ng-if="picks.length">
+        <div class="col-md-6 col-xs-6" ng-repeat="p in picks">
+            <div class="item-holder">
+                <label class="image-radio" liquid="liquidConfiguration">
+                    <input type="radio" name="pick" ng-click="select(p)" />
+                    <img ng-src="{{API}}/picks/{{p}}/image" />
+                </label>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="row">
+        <div class="col-sm-offset-2 col-md-offset-3 col-sm-8 col-md-6 text-centered">
+            <a href="#/ask" class="btn btn-link btn-lg btn-block">Try your own pair!</a>
+        </div>
+    </div>
+</div>
