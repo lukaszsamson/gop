@@ -20,8 +20,8 @@
         <div class="col-md-6 col-xs-6" ng-repeat="p in picks">
             <div class="item-holder">
                 <label class="image-radio" liquid="liquidConfiguration">
-                    <input type="radio" name="pick" ng-click="select(p)" />
-                    <img ng-src="{{API}}/picks/{{p}}/image" />
+                    <input type="radio" name="pick" ng-click="select(p.id)" />
+                    <img ng-src="uploads/{{p.file}}" />
                 </label>
             </div>
         </div>

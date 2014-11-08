@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"github.com/garyburd/redigo/redis"
 	"github.com/go-martini/martini"
@@ -40,10 +39,20 @@ func newPool(server, password string) *redis.Pool {
 	}
 }
 
+func GetEnvOrDefault(key, def string) string {
+  value := os.Getenv(key)
+  if value == "" {
+    value = def
+  }
+  return value
+}
+
 var (
 	pool          *redis.Pool
-	redisServer   = flag.String("redisServer", "localhost:6379", "")
-	redisPassword = flag.String("redisPassword", "", "")
+        uploadsDir    = GetEnvOrDefault("UPLOADS_DIR", "./uploads")
+	redisServer   = GetEnvOrDefault("DB_PORT_6379_TCP_ADDR", "localhost")
+	redisPort     = GetEnvOrDefault("DB_PORT_6379_TCP_PORT", "6379")
+	redisPassword = ""
 )
 
 type Question struct {
@@ -73,9 +82,9 @@ func AddPick(conn redis.Conn) {
 }
 
 func main() {
-
-	flag.Parse()
-	pool = newPool(*redisServer, *redisPassword)
+	redisCon := redisServer + ":" + redisPort
+	fmt.Println(redisCon)
+	pool = newPool(redisCon, redisPassword)
 
 	m := martini.Classic()
 	m.Map(pool)
@@ -120,11 +129,17 @@ func main() {
 		}
 		defer file.Close()
 
-		image, err := ioutil.TempFile(`./upload`, "image_")
+		image, err := ioutil.TempFile(uploadsDir, "image_")
 		if err != nil {
 			panic(err)
 		}
 		defer image.Close()
+                err = image.Chmod(644)
+                if err != nil {
+                        //delete
+                        os.Remove(image.Name())
+                        panic(err)
+                }
 		_, err = io.Copy(image, file)
 		if err != nil {
 			//delete

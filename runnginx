@@ -1,0 +1,3 @@
+#/bin/sh
+sudo docker run -p 8000:80 --link api:api -d --volumes-from uploads --name nginx-all nginx-all
+
