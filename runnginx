@@ -1,3 +1,4 @@
-#/bin/sh
-sudo docker run -p 8000:80 --link api:api -d --volumes-from uploads --name nginx-all nginx-all
+#!/bin/sh
+PWD=$(pwd)
+sudo docker run -p 8000:80 --link api:api -d --volumes-from uploads -v $PWD/site/app:/app --name nginx nginx
 

@@ -1,4 +1,4 @@
 FROM ubuntu
 VOLUME /uploads
-CMD ["echo" "Downloads"]
+CMD ["echo", "Uploads container started"]
 

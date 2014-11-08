@@ -1,2 +1,2 @@
-#/bin/sh
+#!/bin/sh
 sudo docker run --name api -d --link redis:db -p 3000:3000 --volumes-from uploads api

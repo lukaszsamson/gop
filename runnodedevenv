@@ -1,0 +1,4 @@
+#!/bin/bash
+PWD=$(pwd)
+sudo docker run -ti --rm --name node -v $PWD/site:/data dockerfile/nodejs-bower-grunt
+
