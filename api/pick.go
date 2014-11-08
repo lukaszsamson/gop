@@ -130,27 +130,11 @@ func main() {
 			panic(err)
 		}
 
-		res.Header().Set(`Access-Control-Allow-Origin`, `*`)
 		r.JSON(200, map[string]interface{}{"pickId": u})
 	})
 
-	m.Get("/picks/:pickId/image", func(conn redis.Conn, params martini.Params, res http.ResponseWriter, req *http.Request) {
-		r, err := redis.String(conn.Do("GET", fmt.Sprintf("picks:%v:image", params["pickId"])))
-		if err != nil {
-			panic(err)
-		}
-		fmt.Println(r)
-		res.Header().Set(`Content-Type`, `image/*`)
-		http.ServeFile(res, req, r)
-	})
-
-	m.Options("/questions", func(res http.ResponseWriter) {
-		res.Header().Set(`Access-Control-Allow-Origin`, `*`)
-		res.Header().Set(`Access-Control-Allow-Headers`, `Content-Type`)
-	})
-
 	m.Post("/questions", binding.Json(Question{}), func(conn redis.Conn, params martini.Params, msg Question, r render.Render, res http.ResponseWriter) {
-		res.Header().Set(`Access-Control-Allow-Origin`, `*`)
+
 		conn.Send("GET", fmt.Sprintf("picks:%v:image", msg.Pick1Id))
 		conn.Send("GET", fmt.Sprintf("picks:%v:image", msg.Pick2Id))
 		conn.Flush()
@@ -197,7 +181,7 @@ func main() {
 		pick2Id := -1
 		var pick1Image string
 		var pick2Image string
-		res.Header().Set(`Access-Control-Allow-Origin`, `*`)
+
 		conn.Send("SDIFFSTORE", fmt.Sprintf("questionsNotAnswered:%v", userId), "questions", fmt.Sprintf("questionsAnswered:%v", userId))
 		conn.Send("SRANDMEMBER", fmt.Sprintf("questionsNotAnswered:%v", userId))
 		conn.Send("DEL", fmt.Sprintf("questionsNotAnswered:%v", userId))
@@ -251,7 +235,6 @@ func main() {
 	})
 
 	m.Get("/questions/:questionId", func(conn redis.Conn, params martini.Params, r render.Render, res http.ResponseWriter) {
-		res.Header().Set(`Access-Control-Allow-Origin`, `*`)
 		questionId := params["questionId"]
 		pick1Id := -1
 		pick2Id := -1
@@ -305,7 +288,7 @@ func main() {
 	})
 
 	m.Post("/questions/:questionId/picks/:pickId/vote", func(conn redis.Conn, params martini.Params, r render.Render, res http.ResponseWriter) {
-		res.Header().Set(`Access-Control-Allow-Origin`, `*`)
+
 		pick1Id := ""
 		pick2Id := ""
 		questionId := params["questionId"]
