@@ -3,4 +3,4 @@ bower_components
 site/dist
 site/.tmp
 site/npm-debug.log
-
+.vagrant
