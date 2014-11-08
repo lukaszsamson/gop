@@ -4,11 +4,7 @@ angular.module('chooseApp')
   .controller('ResultsCtrl', ['$scope', '$http', '$timeout', '$routeParams', '$location' , 'imageService', function ($scope, $http, $timeout, $routeParams, $location, $stateParams, imageService) {
       $scope.API = API;
       $scope.stateName = 'results';
-      $scope.getResultList = function () {
-          $http.get('../Api/resultsList').success(function (data) {
-              $scope.resultsList = data;
-          });
-      }
+
       $scope.noVotes = false;
       $scope.listView = false;
       $scope.getResultList();

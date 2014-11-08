@@ -19,9 +19,9 @@ function getNext() {
     $http.get(API + '/questions/next')
       .success(function (data) {
           var p = [];
-          if (data && data.pick1Id && data.pick2Id) {
-              p.push(data.pick1Id);
-              p.push(data.pick2Id);
+          if (data && data.pick1 && data.pick2) {
+              p.push(data.pick1);
+              p.push(data.pick2);
               $scope.questionId = data.questionId;
           } else {
               $scope.questionId = null;

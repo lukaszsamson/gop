@@ -40,16 +40,16 @@ func newPool(server, password string) *redis.Pool {
 }
 
 func GetEnvOrDefault(key, def string) string {
-  value := os.Getenv(key)
-  if value == "" {
-    value = def
-  }
-  return value
+	value := os.Getenv(key)
+	if value == "" {
+		value = def
+	}
+	return value
 }
 
 var (
 	pool          *redis.Pool
-        uploadsDir    = GetEnvOrDefault("UPLOADS_DIR", "./uploads")
+	uploadsDir    = GetEnvOrDefault("UPLOADS_DIR", "./uploads")
 	redisServer   = GetEnvOrDefault("DB_PORT_6379_TCP_ADDR", "localhost")
 	redisPort     = GetEnvOrDefault("DB_PORT_6379_TCP_PORT", "6379")
 	redisPassword = ""
@@ -77,10 +77,6 @@ type PostPick struct {
 	pickId int
 }
 
-func AddPick(conn redis.Conn) {
-
-}
-
 func main() {
 	redisCon := redisServer + ":" + redisPort
 	fmt.Println(redisCon)
@@ -101,27 +97,6 @@ func main() {
 
 	m.Use(render.Renderer(render.Options{}))
 
-	//r := martini.NewRouter()
-	// r.Get(`/picks`, GetPicks)
-	// r.Post(`/picks`, AddPick)
-	// r.Post(`/questions`, AddQuestion)
-	// r.Get(`/questions`, GetQuestions)
-	//m.Action(r.Handle)
-	// m.Get("/chans", func(conn redis.Conn, r render.Render) {
-	// 	res, err := redis.Strings(conn.Do("HKEYS", "chans"))
-	// 	if err != nil {
-	// 		panic(err)
-	// 	}
-	// 	r.HTML(200, "chans", Page{"Channels", res, ""})
-	// })
-
-	// m.Post("/picks/:id/vote", binding.Bind(PostMessage{}), func(conn redis.Conn, params martini.Params, msg PostMessage) {
-	// 	_, err := conn.Do("LPUSH", fmt.Sprintf("chans:%v", params["name"]), msg.Message)
-	// 	if err != nil {
-	// 		panic(err)
-	// 	}
-	// })
-
 	m.Post("/picks", binding.MultipartForm(Pick{}), func(conn redis.Conn, params martini.Params, msg Pick, r render.Render, res http.ResponseWriter) {
 		file, err := msg.Image.Open()
 		if err != nil {
@@ -134,12 +109,12 @@ func main() {
 			panic(err)
 		}
 		defer image.Close()
-                err = image.Chmod(644)
-                if err != nil {
-                        //delete
-                        os.Remove(image.Name())
-                        panic(err)
-                }
+		err = image.Chmod(644)
+		if err != nil {
+			//delete
+			os.Remove(image.Name())
+			panic(err)
+		}
 		_, err = io.Copy(image, file)
 		if err != nil {
 			//delete
@@ -174,26 +149,53 @@ func main() {
 	})
 
 	m.Post("/questions", binding.Json(Question{}), func(conn redis.Conn, params martini.Params, msg Question, r render.Render, res http.ResponseWriter) {
+		res.Header().Set(`Access-Control-Allow-Origin`, `*`)
+		conn.Send("GET", fmt.Sprintf("picks:%v:image", msg.Pick1Id))
+		conn.Send("GET", fmt.Sprintf("picks:%v:image", msg.Pick2Id))
+		conn.Flush()
+		pick1ImageR, err := conn.Receive()
+		if err != nil {
+			panic(err)
+		}
+		pick2ImageR, err := conn.Receive()
+		if err != nil {
+			panic(err)
+		}
+		if pick1ImageR == nil || pick2ImageR == nil {
+			r.JSON(400, map[string]interface{}{
+				"msg": "Invalid pick ids",
+			})
+			return
+		}
+
+		pick1Image, err := redis.String(pick1ImageR, nil)
+		if err != nil {
+			panic(err)
+		}
+		pick2Image, err := redis.String(pick2ImageR, nil)
+		if err != nil {
+			panic(err)
+		}
 
 		u := r1.Intn(100)
 		conn.Send("MULTI")
 		conn.Send("SADD", "questions", u)
-		conn.Send("HMSET", fmt.Sprintf("questions:%v", u), "pick1Id", msg.Pick1Id, "pick2Id", msg.Pick2Id)
+		conn.Send("HMSET", fmt.Sprintf("questions:%v", u), "pick1Id", msg.Pick1Id, "pick1Image", pick1Image, "pick2Id", msg.Pick2Id, "pick2Image", pick2Image)
 		conn.Send("HMSET", fmt.Sprintf("questions:%v:votes", u), msg.Pick1Id, 0, msg.Pick2Id, 0)
-		_, err := conn.Do("EXEC")
+		_, err = conn.Do("EXEC")
 		if err != nil {
 			panic(err)
 		}
-		res.Header().Set(`Access-Control-Allow-Origin`, `*`)
+
 		r.JSON(200, map[string]interface{}{"questionId": u})
 	})
 
 	m.Get("/questions/next", func(conn redis.Conn, params martini.Params, r render.Render, res http.ResponseWriter) {
 		userId := 4
-		//var pick1Id string
-		//var pick2Id string
 		pick1Id := -1
 		pick2Id := -1
+		var pick1Image string
+		var pick2Image string
 		res.Header().Set(`Access-Control-Allow-Origin`, `*`)
 		conn.Send("SDIFFSTORE", fmt.Sprintf("questionsNotAnswered:%v", userId), "questions", fmt.Sprintf("questionsAnswered:%v", userId))
 		conn.Send("SRANDMEMBER", fmt.Sprintf("questionsNotAnswered:%v", userId))
@@ -224,20 +226,26 @@ func main() {
 			panic(err)
 		}
 
-		r1, err := redis.Values(conn.Do("HMGET", fmt.Sprintf("questions:%v", questionId), "pick1Id", "pick2Id"))
+		r1, err := redis.Values(conn.Do("HMGET", fmt.Sprintf("questions:%v", questionId), "pick1Id", "pick1Image", "pick2Id", "pick2Image"))
 		if err != nil {
 			panic(err)
 		}
 		fmt.Println(r1)
-		_, err = redis.Scan(r1, &pick1Id, &pick2Id)
+		_, err = redis.Scan(r1, &pick1Id, &pick2Id, &pick1Image, &pick2Image)
 		if err != nil {
 			panic(err)
 		}
 
 		r.JSON(200, map[string]interface{}{
 			"questionId": questionId,
-			"pick1Id":    pick1Id,
-			"pick2Id":    pick2Id,
+			"pick1": map[string]interface{}{
+				"pickId": pick1Id,
+				"image":  pick1Image,
+			},
+			"pick2": map[string]interface{}{
+				"pickId": pick2Id,
+				"image":  pick2Image,
+			},
 		})
 	})
 
@@ -246,7 +254,9 @@ func main() {
 		questionId := params["questionId"]
 		pick1Id := -1
 		pick2Id := -1
-		conn.Send("HMGET", fmt.Sprintf("questions:%v", questionId), "pick1Id", "pick2Id")
+		var pick1Image string
+		var pick2Image string
+		conn.Send("HMGET", fmt.Sprintf("questions:%v", questionId), "pick1Id", "pick1Image", "pick2Id", "pick2Image")
 		conn.Send("HGETALL", fmt.Sprintf("questions:%v:votes", questionId))
 		conn.Flush()
 		r1, err := redis.Values(conn.Receive())
@@ -254,7 +264,7 @@ func main() {
 			panic(err)
 		}
 		fmt.Println(r1)
-		_, err = redis.Scan(r1, &pick1Id, &pick2Id)
+		_, err = redis.Scan(r1, &pick1Id, &pick2Id, &pick1Image, &pick2Image)
 		if err != nil {
 			panic(err)
 		}
@@ -282,10 +292,12 @@ func main() {
 		r.JSON(200, map[string]interface{}{
 			"pick1Result": map[string]interface{}{
 				"pickId":     pick1Id,
+				"image":      pick1Image,
 				"votesCount": pick1Votes,
 			},
 			"pick2Result": map[string]interface{}{
 				"pickId":     pick2Id,
+				"image":      pick2Image,
 				"votesCount": pick2Votes,
 			},
 		})
@@ -345,14 +357,6 @@ func main() {
 		}
 		r.JSON(200, map[string]interface{}{"msg": "Ok"})
 	})
-
-	// m.Get("/chans/:name", func(conn redis.Conn, params martini.Params, r render.Render) {
-	// 	res, err := redis.Strings(conn.Do("LRANGE", fmt.Sprintf("chans:%v", params["name"]), 0, -1))
-	// 	if err != nil {
-	// 		panic(err)
-	// 	}
-	// 	r.HTML(200, "msgs", Page{fmt.Sprintf("Messages in %v", params["name"]), res, fmt.Sprintf("/chans/%v", params["name"])})
-	// })
 
 	m.Run()
 }
