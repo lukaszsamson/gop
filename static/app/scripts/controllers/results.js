@@ -4,10 +4,8 @@ angular.module('chooseApp')
   .controller('ResultsCtrl', ['$scope', '$http', '$timeout', '$routeParams', '$location' , 'imageService', function ($scope, $http, $timeout, $routeParams, $location, $stateParams, imageService) {
       $scope.API = API;
       $scope.stateName = 'results';
-
       $scope.noVotes = false;
       $scope.listView = false;
-      $scope.getResultList();
 
       $scope.getQuestionResults = function (id) {
           if (typeof ($routeParams.questionId) != 'undefined') {

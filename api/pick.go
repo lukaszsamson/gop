@@ -12,6 +12,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
+	"path/filepath"
 	"time"
 )
 
@@ -123,7 +124,7 @@ func main() {
 		}
 
 		u := r1.Intn(100)
-		_, err = conn.Do("SET", fmt.Sprintf("picks:%v:image", u), image.Name())
+		_, err = conn.Do("SET", fmt.Sprintf("picks:%v:image", u), filepath.Base(image.Name()))
 		if err != nil {
 			os.Remove(image.Name())
 			panic(err)
@@ -231,7 +232,7 @@ func main() {
 			panic(err)
 		}
 		fmt.Println(r1)
-		_, err = redis.Scan(r1, &pick1Id, &pick2Id, &pick1Image, &pick2Image)
+		_, err = redis.Scan(r1, &pick1Id, &pick1Image, &pick2Id, &pick2Image)
 		if err != nil {
 			panic(err)
 		}
@@ -264,7 +265,7 @@ func main() {
 			panic(err)
 		}
 		fmt.Println(r1)
-		_, err = redis.Scan(r1, &pick1Id, &pick2Id, &pick1Image, &pick2Image)
+		_, err = redis.Scan(r1, &pick1Id, &pick1Image, &pick2Id, &pick2Image)
 		if err != nil {
 			panic(err)
 		}
