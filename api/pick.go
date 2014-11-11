@@ -80,7 +80,8 @@ type PostPick struct {
 
 func main() {
 	redisCon := redisServer + ":" + redisPort
-	fmt.Println(redisCon)
+	fmt.Println("Connecting to redis at " + redisCon)
+  fmt.Println("Uploads will be stored in " + uploadsDir)
 	pool = newPool(redisCon, redisPassword)
 
 	m := martini.Classic()
@@ -248,6 +249,10 @@ func main() {
 			panic(err)
 		}
 		fmt.Println(r1)
+    if (r1[0] == nil) {
+      r.JSON(404, map[string]interface{}{"msg": "Question not found"})
+      return
+    }
 		_, err = redis.Scan(r1, &pick1Id, &pick1Image, &pick2Id, &pick2Image)
 		if err != nil {
 			panic(err)
@@ -305,9 +310,11 @@ func main() {
 
 		if pick1Id == "" || pick2Id == "" {
 			r.JSON(404, map[string]interface{}{"msg": "Question not found"})
+      return
 		}
 		if pick1Id != pickId && pick2Id != pickId {
 			r.JSON(404, map[string]interface{}{"msg": "Pick not found"})
+      return
 		}
 
 		userId := 4
