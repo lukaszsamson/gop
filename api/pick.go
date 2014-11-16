@@ -8,11 +8,11 @@ import (
 	"github.com/martini-contrib/render"
 	"io"
 	"io/ioutil"
-	"math/rand"
 	"mime/multipart"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"time"
 )
 
@@ -50,6 +50,7 @@ func GetEnvOrDefault(key, def string) string {
 
 var (
 	pool          *redis.Pool
+	instance      = GetEnvOrDefault("INSTANCE", "1")
 	uploadsDir    = GetEnvOrDefault("UPLOADS_DIR", "./uploads")
 	redisServer   = GetEnvOrDefault("DB_PORT_6379_TCP_ADDR", "localhost")
 	redisPort     = GetEnvOrDefault("DB_PORT_6379_TCP_PORT", "6379")
@@ -79,9 +80,12 @@ type PostPick struct {
 }
 
 func main() {
+	inst, _ := strconv.Atoi(instance)
+	fmt.Println("Setting up snowflake with instance id", inst)
+	snowflake.Setup(uint8(inst))
 	redisCon := redisServer + ":" + redisPort
 	fmt.Println("Connecting to redis at " + redisCon)
-  fmt.Println("Uploads will be stored in " + uploadsDir)
+	fmt.Println("Uploads will be stored in " + uploadsDir)
 	pool = newPool(redisCon, redisPassword)
 
 	m := martini.Classic()
@@ -93,9 +97,6 @@ func main() {
 		c.Next()
 		conn.Close()
 	})
-	s1 := rand.NewSource(42)
-	r1 := rand.New(s1)
-	r1.Intn(100)
 
 	m.Use(render.Renderer(render.Options{}))
 
@@ -124,7 +125,7 @@ func main() {
 			panic(err)
 		}
 
-		u := r1.Intn(100)
+		u := snowflake.GetId()
 		_, err = conn.Do("SET", fmt.Sprintf("picks:%v:image", u), filepath.Base(image.Name()))
 		if err != nil {
 			os.Remove(image.Name())
@@ -163,7 +164,7 @@ func main() {
 			panic(err)
 		}
 
-		u := r1.Intn(100)
+		u := snowflake.GetId()
 		conn.Send("MULTI")
 		conn.Send("SADD", "questions", u)
 		conn.Send("HMSET", fmt.Sprintf("questions:%v", u), "pick1Id", msg.Pick1Id, "pick1Image", pick1Image, "pick2Id", msg.Pick2Id, "pick2Image", pick2Image)
@@ -249,10 +250,10 @@ func main() {
 			panic(err)
 		}
 		fmt.Println(r1)
-    if (r1[0] == nil) {
-      r.JSON(404, map[string]interface{}{"msg": "Question not found"})
-      return
-    }
+		if r1[0] == nil {
+			r.JSON(404, map[string]interface{}{"msg": "Question not found"})
+			return
+		}
 		_, err = redis.Scan(r1, &pick1Id, &pick1Image, &pick2Id, &pick2Image)
 		if err != nil {
 			panic(err)
@@ -310,11 +311,11 @@ func main() {
 
 		if pick1Id == "" || pick2Id == "" {
 			r.JSON(404, map[string]interface{}{"msg": "Question not found"})
-      return
+			return
 		}
 		if pick1Id != pickId && pick2Id != pickId {
 			r.JSON(404, map[string]interface{}{"msg": "Pick not found"})
-      return
+			return
 		}
 
 		userId := 4
