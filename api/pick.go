@@ -85,7 +85,7 @@ type User struct {
 	accessToken string
 	expiresIn int
 	signedRequest string
-	userId string
+	userID string
 }
 
 func main() {
@@ -110,22 +110,30 @@ func main() {
 	})
 
 	loginHandler := func(c martini.Context, session sessions.Session, r render.Render) {
-		userId := session.Get("userId")
-		if userId == nil {
+		userID := session.Get("userID")
+		if userID == nil {
 			r.JSON(401, map[string]interface{}{"msg": "Not authenticated"})
 			return
 		}
+		user := User{}
+		user.userID = userID.(string)
+		if user.userID == "" {
+			panic("userID is empty")
+		}
+
+		c.Map(user)
 		c.Next()
 	}
 
 	m.Use(render.Renderer(render.Options{}))
 
 	m.Post("/login", binding.Json(User{}), func(session sessions.Session, user User, r render.Render) {
-		session.Set("userId", user.userId)
+		fmt.Printf("%v\n", user.userID)
+		session.Set("userID", user.userID)
 		r.JSON(200, map[string]interface{}{"msg": "Ok"})
 	})
 
-	m.Post("/picks", loginHandler, binding.MultipartForm(Pick{}), func(conn redis.Conn, params martini.Params, msg Pick, r render.Render, res http.ResponseWriter) {
+	m.Post("/picks", loginHandler, binding.MultipartForm(Pick{}), func(conn redis.Conn, user User, params martini.Params, msg Pick, r render.Render, res http.ResponseWriter) {
 		file, err := msg.Image.Open()
 		if err != nil {
 			panic(err)
@@ -160,7 +168,7 @@ func main() {
 		r.JSON(200, map[string]interface{}{"pickId": u})
 	})
 
-	m.Post("/questions", loginHandler, binding.Json(Question{}), func(conn redis.Conn, params martini.Params, msg Question, r render.Render, res http.ResponseWriter) {
+	m.Post("/questions", loginHandler, binding.Json(Question{}), func(conn redis.Conn, user User, params martini.Params, msg Question, r render.Render, res http.ResponseWriter) {
 
 		conn.Send("GET", fmt.Sprintf("picks:%v:image", msg.Pick1Id))
 		conn.Send("GET", fmt.Sprintf("picks:%v:image", msg.Pick2Id))
@@ -202,8 +210,8 @@ func main() {
 		r.JSON(200, map[string]interface{}{"questionId": u})
 	})
 
-	m.Get("/questions/next", loginHandler, func(conn redis.Conn, params martini.Params, r render.Render, res http.ResponseWriter) {
-		userId := 4
+	m.Get("/questions/next", loginHandler, func(conn redis.Conn, user User, params martini.Params, r render.Render, res http.ResponseWriter) {
+		userId := user.userID
 		pick1Id := -1
 		pick2Id := -1
 		var pick1Image string
@@ -261,7 +269,7 @@ func main() {
 		})
 	})
 
-	m.Get("/questions/:questionId", loginHandler, func(conn redis.Conn, params martini.Params, r render.Render, res http.ResponseWriter) {
+	m.Get("/questions/:questionId", loginHandler, func(conn redis.Conn, user User, params martini.Params, r render.Render, res http.ResponseWriter) {
 		questionId := params["questionId"]
 		pick1Id := -1
 		pick2Id := -1
@@ -318,7 +326,7 @@ func main() {
 		})
 	})
 
-	m.Post("/questions/:questionId/picks/:pickId/vote", loginHandler, func(conn redis.Conn, params martini.Params, r render.Render, res http.ResponseWriter) {
+	m.Post("/questions/:questionId/picks/:pickId/vote", loginHandler, func(conn redis.Conn, user User, params martini.Params, r render.Render, res http.ResponseWriter) {
 
 		pick1Id := ""
 		pick2Id := ""
@@ -343,7 +351,7 @@ func main() {
 			return
 		}
 
-		userId := 4
+		userId := user.userID
 		conn.Send("WATCH", fmt.Sprintf("questionsAnswered:%v", userId))
 		conn.Send("SISMEMBER", fmt.Sprintf("questionsAnswered:%v", userId), questionId)
 		conn.Flush()

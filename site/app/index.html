@@ -32,6 +32,7 @@
       FB.init({
         appId      : '755747781139883',
         cookie     : true,  // enable cookies to allow the server to access the session
+        status     : true, //check login
         xfbml      : true,
         version    : 'v2.2'
       });
@@ -54,6 +55,11 @@
       // Full docs on the response object can be found in the documentation
       // for FB.getLoginStatus().
       if (response.status === 'connected') {
+        $.ajax(API + '/login', {
+          data: JSON.stringify(response.authResponse),
+          contentType: 'application/json',
+          type : 'POST'
+        });
         // Logged into your app and Facebook.
         //testAPI();
       } else if (response.status === 'not_authorized') {
