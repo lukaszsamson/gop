@@ -82,10 +82,10 @@ type PostPick struct {
 }
 
 type User struct {
-	accessToken string
-	expiresIn int
-	signedRequest string
-	userID string
+	AccessToken string `json:"accessToken"`
+	ExpiresIn int `json:"expiresIn"`
+	SignedRequest string `json:"signedRequest"`
+	UserID string `json:"userID"`
 }
 
 func main() {
@@ -116,8 +116,8 @@ func main() {
 			return
 		}
 		user := User{}
-		user.userID = userID.(string)
-		if user.userID == "" {
+		user.UserID = userID.(string)
+		if user.UserID == "" {
 			panic("userID is empty")
 		}
 
@@ -128,8 +128,8 @@ func main() {
 	m.Use(render.Renderer(render.Options{}))
 
 	m.Post("/login", binding.Json(User{}), func(session sessions.Session, user User, r render.Render) {
-		fmt.Printf("%v\n", user.userID)
-		session.Set("userID", user.userID)
+		fmt.Printf("%v\n", user.UserID)
+		session.Set("userID", user.UserID)
 		r.JSON(200, map[string]interface{}{"msg": "Ok"})
 	})
 
@@ -211,7 +211,7 @@ func main() {
 	})
 
 	m.Get("/questions/next", loginHandler, func(conn redis.Conn, user User, params martini.Params, r render.Render, res http.ResponseWriter) {
-		userId := user.userID
+		userId := user.UserID
 		pick1Id := -1
 		pick2Id := -1
 		var pick1Image string
@@ -351,7 +351,7 @@ func main() {
 			return
 		}
 
-		userId := user.userID
+		userId := user.UserID
 		conn.Send("WATCH", fmt.Sprintf("questionsAnswered:%v", userId))
 		conn.Send("SISMEMBER", fmt.Sprintf("questionsAnswered:%v", userId), questionId)
 		conn.Flush()

@@ -27,64 +27,14 @@
 </head>
 <body ng-app="chooseApp">
   <script>
-    window.API = '/api'
-    window.fbAsyncInit = function() {
-      FB.init({
-        appId      : '755747781139883',
-        cookie     : true,  // enable cookies to allow the server to access the session
-        status     : true, //check login
-        xfbml      : true,
-        version    : 'v2.2'
-      });
-      checkLoginState();
-    };
-
-    (function(d, s, id){
-      var js, fjs = d.getElementsByTagName(s)[0];
-      if (d.getElementById(id)) {return;}
-      js = d.createElement(s); js.id = id;
-      js.src = "//connect.facebook.net/en_US/sdk.js";
-      fjs.parentNode.insertBefore(js, fjs);
-    }(document, 'script', 'facebook-jssdk'));
-
-    function statusChangeCallback(response) {
-      console.log('statusChangeCallback');
-      console.log(response);
-      // The response object is returned with a status field that lets the
-      // app know the current login status of the person.
-      // Full docs on the response object can be found in the documentation
-      // for FB.getLoginStatus().
-      if (response.status === 'connected') {
-        $.ajax(API + '/login', {
-          data: JSON.stringify(response.authResponse),
-          contentType: 'application/json',
-          type : 'POST'
-        });
-        // Logged into your app and Facebook.
-        //testAPI();
-      } else if (response.status === 'not_authorized') {
-        // The person is logged into Facebook, but not your app.
-        //document.getElementById('status').innerHTML = 'Please log ' +
-        //  'into this app.';
-      } else {
-        // The person is not logged into Facebook, so we're not sure if
-        // they are logged into this app or not.
-        //document.getElementById('status').innerHTML = 'Please log ' +
-        //  'into Facebook.';
-      }
-    }
-
-    function checkLoginState() {
-      FB.getLoginStatus(function(response) {
-        statusChangeCallback(response);
-      });
-    }
-
+    window.API = '/api';
   </script>
 
     <div class="main">
-      <fb:login-button scope="public_profile,email" onlogin="checkLoginState();">
-      </fb:login-button>
+      <div ng-controller="LoginCtrl">
+        <button class="btn btn-primary" ng-click="login()" ng-show="!loginStatus || loginStatus.status != 'connected'">Login with fb</button>
+        <button class="btn btn-danger" ng-click="logout()" ng-show="loginStatus.status == 'connected'">Logout</button>
+      </div>
         <!--[if lt IE 7]>
         <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
         <![endif]-->
@@ -120,6 +70,7 @@
     <script src="bower_components/angular-animate/angular-animate.js"></script>
     <script src="bower_components/imgLiquid/js/imgLiquid.js"></script>
     <script src="bower_components/angular-route/angular-route.js"></script>
+    <script src="bower_components/angular-easyfb/angular-easyfb.js"></script>
     <!-- endbower -->
     <!-- endbuild -->
     <!-- build:js({.tmp,app}) scripts/scripts.js -->
@@ -129,6 +80,7 @@
     <script src="scripts/controllers/results.js"></script>
     <script src="scripts/controllers/ask.js"></script>
     <script src="scripts/controllers/home.js"></script>
+    <script src="scripts/controllers/login.js"></script>
     <script src="scripts/resources/fileUpload.js"></script>
 
 

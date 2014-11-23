@@ -5,9 +5,19 @@ angular.module('chooseApp', [
   'ngResource',
   'ngRoute',
   'angularFileUpload',
-        'ngAnimate',
-  'tc.chartjs'
+  'ngAnimate',
+  'tc.chartjs',
+  'ezfb'
 ])
+.config(['ezfbProvider', function (exfbProvider) {
+  exfbProvider.setInitParams({
+    appId: '755747781139883',
+    cookie: true,
+    status: true,
+    xfbml: true,
+    version: 'v2.2'
+  });
+}])
 .config(['$routeProvider', '$locationProvider',
     function ($routeProvider, $locationProvider) {
     $routeProvider
