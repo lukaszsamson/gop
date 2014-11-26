@@ -42,6 +42,24 @@ func newPool(server, password string) *redis.Pool {
 	}
 }
 
+var scriptCache = make(map[string]string)
+
+func s(fileName string) string {
+	cached, exists := scriptCache[fileName]
+	if exists {
+		return cached
+	}
+
+	buf, err := ioutil.ReadFile(fileName)
+	if err != nil {
+		panic(err)
+	}
+
+	loaded := string(buf)
+	scriptCache[fileName] = loaded
+	return loaded
+}
+
 func GetEnvOrDefault(key, def string) string {
 	value := os.Getenv(key)
 	if value == "" {
@@ -60,13 +78,13 @@ var (
 )
 
 type Question struct {
-	Pick1Id int
-	Pick2Id int
+	Pick1Id string
+	Pick2Id string
 }
 
 type Vote struct {
-	QuestionId int
-	PickId     int
+	QuestionId string
+	PickId     string
 }
 
 type NextQuestion struct {
@@ -75,10 +93,6 @@ type NextQuestion struct {
 
 type Pick struct {
 	Image *multipart.FileHeader `form:"file"`
-}
-
-type PostPick struct {
-	pickId int
 }
 
 type User struct {
@@ -165,8 +179,24 @@ func main() {
 			panic(err)
 		}
 
-		r.JSON(200, map[string]interface{}{"pickId": u})
+		r.JSON(200, map[string]interface{}{"pickId": fmt.Sprintf("%v", u)})
 	})
+
+	// m.Post("/questions", loginHandler, binding.Json(Question{}), func(conn redis.Conn, user User, msg Question, r render.Render) {
+	// 	u := snowflake.GetId()
+	// 	_, err := conn.Do("EVAL", s("saveQuestion.lua"), 5,
+	// 	  fmt.Sprintf("picks:%v:image", msg.Pick1Id),
+	// 	  fmt.Sprintf("picks:%v:image", msg.Pick2Id),
+	// 	  "questions",
+	// 	  fmt.Sprintf("questions:%v", u),
+	// 	  fmt.Sprintf("questions:%v:votes", u))
+	// 		if err != nil {
+	// 			//todo sprawdzić rez i 400
+	// 			panic(err)
+	// 		}
+	//
+	// 		r.JSON(200, map[string]interface{}{"questionId": fmt.Sprintf("%v", u)})
+	// 		})
 
 	m.Post("/questions", loginHandler, binding.Json(Question{}), func(conn redis.Conn, user User, params martini.Params, msg Question, r render.Render, res http.ResponseWriter) {
 
@@ -207,13 +237,13 @@ func main() {
 			panic(err)
 		}
 
-		r.JSON(200, map[string]interface{}{"questionId": u})
+		r.JSON(200, map[string]interface{}{"questionId": fmt.Sprintf("%v", u)})
 	})
 
 	m.Get("/questions/next", loginHandler, func(conn redis.Conn, user User, params martini.Params, r render.Render, res http.ResponseWriter) {
 		userId := user.UserID
-		pick1Id := -1
-		pick2Id := -1
+		pick1Id := ""
+		pick2Id := ""
 		var pick1Image string
 		var pick2Image string
 
@@ -241,7 +271,7 @@ func main() {
 			return
 		}
 
-		questionId, err := redis.Int(questionIdR, nil)
+		questionId, err := redis.String(questionIdR, nil)
 		if err != nil {
 			panic(err)
 		}
@@ -271,8 +301,8 @@ func main() {
 
 	m.Get("/questions/:questionId", loginHandler, func(conn redis.Conn, user User, params martini.Params, r render.Render, res http.ResponseWriter) {
 		questionId := params["questionId"]
-		pick1Id := -1
-		pick2Id := -1
+		pick1Id := ""
+		pick2Id := ""
 		var pick1Image string
 		var pick2Image string
 		conn.Send("HMGET", fmt.Sprintf("questions:%v", questionId), "pick1Id", "pick1Image", "pick2Id", "pick2Image")
@@ -291,9 +321,9 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		id1 := -1
+		id1 := ""
 		count1 := -1
-		id2 := -1
+		id2 := ""
 		count2 := -1
 		r2, err := redis.Values(conn.Receive())
 		if err != nil {
