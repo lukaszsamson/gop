@@ -3,11 +3,6 @@ package main
 import (
 	"app/snowflake"
 	"fmt"
-	"github.com/garyburd/redigo/redis"
-	"github.com/go-martini/martini"
-	"github.com/martini-contrib/binding"
-	"github.com/martini-contrib/render"
-	"github.com/martini-contrib/sessions"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
@@ -16,6 +11,12 @@ import (
 	"path/filepath"
 	"strconv"
 	"time"
+
+	"github.com/garyburd/redigo/redis"
+	"github.com/go-martini/martini"
+	"github.com/martini-contrib/binding"
+	"github.com/martini-contrib/render"
+	"github.com/martini-contrib/sessions"
 )
 
 func newPool(server, password string) *redis.Pool {
@@ -82,10 +83,10 @@ type PostPick struct {
 }
 
 type User struct {
-	accessToken string
-	expiresIn int
+	accessToken   string
+	expiresIn     int
 	signedRequest string
-	userID string
+	userID        string
 }
 
 func main() {

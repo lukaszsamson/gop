@@ -29,8 +29,7 @@ angular.module('chooseApp')
 
     $scope.ask = function () {
         $http.post(API + '/questions', {
-            pick1Id: $scope.ids[0],
-            pick2Id: $scope.ids[1]
+            uploadsIds: [$scope.ids[0], $scope.ids[1]]
         }).success(function (data) {
             $scope.resultId = data.questionId;
             $location.path("/results/" + $scope.resultId);

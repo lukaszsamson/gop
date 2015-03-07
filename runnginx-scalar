@@ -1,0 +1,4 @@
+#!/bin/sh
+PWD=$(pwd)
+sudo docker run -p 8000:80 --link scalar:api -d --volumes-from uploads -v $PWD/site/app:/app --name nginx-scalar nginx
+
