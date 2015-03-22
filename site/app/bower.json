@@ -1,0 +1,21 @@
+{
+  "name": "Decide",
+  "version": "0.0.0",
+  "authors": [
+    "Lukasz Samson"
+  ],
+  "moduleType": [
+    "node"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "app/vendor",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "flat-ui": "~2.2.2"
+  }
+}

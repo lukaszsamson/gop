@@ -1,0 +1,347 @@
+<!-- index.html -->
+<html>
+  <head>
+    <title>Hello React</title>
+    <link rel="stylesheet" href="/bower_components/fullpage.js/jquery.fullPage.js">
+    <style>
+    body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,
+form,fieldset,input,textarea,p,blockquote,th,td {
+    padding: 0;
+    margin: 0;
+}
+a{
+	text-decoration:none;
+}
+table {
+    border-spacing: 0;
+}
+fieldset,img {
+    border: 0;
+}
+address,caption,cite,code,dfn,em,strong,th,var {
+    font-weight: normal;
+    font-style: normal;
+}
+strong{
+	font-weight: bold;
+}
+ol,ul {
+    list-style: none;
+    margin:0;
+    padding:0;
+}
+caption,th {
+    text-align: left;
+
+}
+h1,h2,h3,h4,h5,h6 {
+    font-weight: normal;
+    font-size: 100%;
+    margin:0;
+    padding:0;
+    color:#444;
+}
+q:before,q:after {
+    content:'';
+}
+abbr,acronym { border: 0;
+}
+
+
+/* Custom CSS
+ * --------------------------------------- */
+body{
+	font-family: arial,helvetica;
+	color: #333;
+	color: rgba(0,0,0,0.5);
+}
+.wrap{
+	margin-left: auto;
+	margin-right: auto;
+	width: 960px;
+	position: relative;
+}
+h1{
+	font-size: 6em;
+}
+p{
+	font-size: 2em;
+}
+.intro p{
+	width: 50%;
+	margin: 0 auto;
+	font-size: 1.5em;
+}
+.section{
+	text-align:center;
+}
+
+/* Style for our header texts
+* --------------------------------------- */
+h1{
+  font-size: 5em;
+  font-family: arial,helvetica;
+  color: #fff;
+  margin:0;
+}
+.intro p{
+  color: #fff;
+}
+/* Centered texts in each section
+* --------------------------------------- */
+.section{
+  text-align:center;
+}
+/* Overwriting styles for the navigation dots (to place it where we want)
+* --------------------------------------- */
+.fp-slidesNav.bottom{
+  bottom: 25px;
+}
+/* Bottom menu
+* --------------------------------------- */
+#infoMenu li a {
+  color: #fff;
+}
+#section2 h1{
+  color: #333;
+}
+</style>
+
+    <script src="http://fb.me/react-0.12.2.js"></script>
+    <script src="http://fb.me/JSXTransformer-0.12.2.js"></script>
+    <script src="http://code.jquery.com/jquery-1.10.0.min.js"></script>
+    <script src="/bower_components/fullpage.js/jquery.fullPage.js"></script>
+  </head>
+  <body>
+    <div id="content">
+
+    </div>
+    <script type="text/jsx">
+
+
+    var ImageList = React.createClass({
+      selectionChanged: function(i, c) {
+        this.props.selectionChanged(i, c);
+      },
+      render: function() {
+        var that = this;
+        images = this.props.data.map(function (i) {
+          return (
+            <ImageForm id={i} cb={that.selectionChanged.bind(that, i)} key={i}/>
+          );
+        })
+        return (
+          <div className="imageList section">
+            {images}
+          </div>
+        );
+      }
+    });
+
+    var ImageForm = React.createClass({
+      getInitialState: function() {
+        return {
+          checked: false
+        }
+      },
+      render: function() {
+        return (
+          <div className="imageForm slide" data-anchor={this.props.id}>
+          <div className="info">
+          <p>
+        <img src={"/uploads/image_" + this.props.id} alt="test" onClick={this.handleClick}/>
+            {"/uploads/image_" + this.props.id}
+            </p>
+            <input readOnly type="checkbox" value={this.props.id} checked={this.state.checked}/>
+            </div>
+          </div>
+        );
+      },
+      handleClick: function() {
+        //debugger;
+        var newState = !this.state.checked;
+        this.setState({
+          checked: newState
+          });
+        this.props.cb(newState);
+      }
+    });
+
+    var ImagesBox = React.createClass({
+      selectionChanged: function(i, checked) {
+        var old = this.props.selected;
+        if (checked) {
+          old.push(i)
+        } else {
+          old = old.filter(function(j) {return i != j;})
+        }
+        this.setProps({selected: old})
+      },
+      getDefaultProps: function() {
+        return {
+          data: [],
+          selected: [],
+          selectionChanged: this.selectionChanged
+        };
+      },
+      componentDidMount: function() {
+        $.ajax({
+          url: "/api/picks",
+          dataType: "json",
+          success: function(data) {
+            this.setProps({
+              data: data
+            });
+            setTimeout(function() {
+
+            $("#fullpage").fullpage({
+            				anchors: ['firstPage', 'secondPage', '3rdPage'],
+            				sectionsColor: ['#8FB98B', '#DE564B', '#EAE1C0'],
+            				slidesNavigation: true,
+            			});
+                }.bind(this), 3000);
+          }.bind(this)
+        });
+
+
+      },
+      onDrop: function(files) {
+        var formData = new FormData();
+        formData.append("file", files[0]);
+
+        $.ajax({
+          url: "/api/picks",
+          processData: false,
+          type: "POST",
+          contentType: false,
+          data: formData,
+          success: function(r) {
+            var data = this.props.data;
+            data.push(r.pickId);
+            this.setProps({data: data});
+          }.bind(this)
+        });
+      },
+      handleCreate: function() {
+        console.log(JSON.stringify(this.props.selected));
+      },
+      render: function() {
+        var that = this;
+        return (
+          <div className="imagesBox">
+<div id="fullpage">
+          <div className="section" id="section0">
+            <div className="intro">
+              <img src="imgs/1.png"  alt="1"/>
+              <h1>Sliders navigation dots</h1>
+              <p>Create a navigation for your landscape sliders</p>
+            </div>
+          </div>
+
+          <ImageList data={this.props.data} selectionChanged={this.selectionChanged} />
+
+</div>
+<button onClick={this.handleCreate}>Create</button>
+          </div>
+
+        );
+      }
+    });
+
+
+
+
+
+
+
+
+
+
+    var Dropzone = React.createClass({
+  getInitialState: function() {
+    return {
+      isDragActive: false
+    }
+  },
+
+  propTypes: {
+    onDrop: React.PropTypes.func.isRequired,
+    size: React.PropTypes.number,
+    style: React.PropTypes.object
+  },
+
+  onDragLeave: function(e) {
+    this.setState({
+      isDragActive: false
+    });
+  },
+
+  onDragOver: function(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "copy";
+
+    this.setState({
+      isDragActive: true
+    });
+  },
+
+  onDrop: function(e) {
+    e.preventDefault();
+
+    this.setState({
+      isDragActive: false
+    });
+
+    var files;
+    if (e.dataTransfer) {
+      files = e.dataTransfer.files;
+    } else if (e.target) {
+      files = e.target.files;
+    }
+
+    if (this.props.onDrop) {
+      files = Array.prototype.slice.call(files);
+      this.props.onDrop(files);
+    }
+  },
+
+  onClick: function () {
+    this.refs.fileInput.getDOMNode().click();
+  },
+
+  render: function() {
+
+    var className = this.props.className || 'dropzone';
+    if (this.state.isDragActive) {
+      className += ' active';
+    };
+
+    var style = this.props.style || {
+      width: this.props.size || 100,
+      height: this.props.size || 100,
+      borderStyle: this.state.isDragActive ? "solid" : "dashed"
+    };
+
+    if (this.props.className) {
+      style = this.props.style;
+    }
+
+    return (
+      <div className={className} style={style} onClick={this.onClick} onDragLeave={this.onDragLeave} onDragOver={this.onDragOver} onDrop={this.onDrop}>
+        <input style={{display: 'none' }} type='file' multiple ref='fileInput' onChange={this.onDrop} />
+        {this.props.children}
+      </div>
+    );
+  }
+
+});
+
+    React.render(
+      <ImagesBox/>,
+      document.getElementById('content')
+    );
+
+
+    </script>
+  </body>
+</html>

@@ -1,0 +1,7 @@
+{
+  "name": "decide",
+  "version": "0.1.0",
+  "dependencies": {
+    "fullpage.js": "^2.6.0"
+  }
+}

@@ -1,0 +1,4 @@
+#!/bin/bash
+PWD=$(pwd)
+sudo docker run -ti --rm --name ui -v $PWD/site:/data ui
+

@@ -23,9 +23,14 @@ libraryDependencies ++= Seq(
   "io.spray" %%  "spray-json" % "1.3.1",
   "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
   "ch.qos.logback" % "logback-classic" % "1.1.2",
-  "com.geteventstore" %% "akka-persistence-eventstore" % "2.0.0"
+  "com.geteventstore" %% "akka-persistence-eventstore" % "2.0.0",
+  "org.json4s" %% "json4s-jackson" % "3.2.11",
+  "org.json4s" %% "json4s-ext" % "3.2.11"
 )
 
-fork := true
-javaOptions += "-Dakka.persistence.journal.leveldb.dir=/uploads"
-javaOptions += "-Dakka.persistence.journal.leveldb.native=off" 
+//fork := true
+
+//javaOptions += "-Dakka.persistence.journal.leveldb.dir=/uploads"
+
+//javaOptions += "-Dakka.persistence.journal.leveldb.native=off"
+

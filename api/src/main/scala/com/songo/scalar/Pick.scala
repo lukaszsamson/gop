@@ -11,14 +11,14 @@ object Pick {
 
 
   object Event {
-    sealed trait Event
+    sealed trait Event extends EventBase
     case class PickVoted(file: String) extends Event
-    case class PickCreated(id: String, files: List[String]) extends Event
+    case class PickCreated(id: String, files: List[String], userId: String) extends Event
   }
 
   object Command {
     sealed trait Command
-    case class Create(id: String, files: List[String]) extends Command
+    case class Create(id: String, files: List[String], userId: String) extends Command
     case class Vote(file: String) extends Command
   }
   
@@ -33,7 +33,7 @@ object Pick {
     def updated(evt: Event): PickState =
       copy(
         evt match {
-          case PickCreated(id, files) => {
+          case PickCreated(id, files, userId) => {
             files.map(f => (f, 0)).toMap
           }
           case PickVoted(file) => {
@@ -41,7 +41,7 @@ object Pick {
           }
           case x => throw new Exception(s"No match for $x")
         })
-    private var logger = Logger(LoggerFactory.getLogger(this.getClass))
+    private val logger = Logger(LoggerFactory.getLogger(this.getClass))
     override def toString: String = Votes.toString
   }
 
@@ -72,32 +72,32 @@ object Pick {
 
     val receiveCommand: Receive = {
       case Vote(data) => {
-        logger.debug(s"Vote recieved $state $data")
+        logger.debug(s"Vote received $state $data")
         if (state.Votes.isEmpty)
           sender ! Status.Failure(new Exception("Not created"))
         else if (!state.Votes.contains(data))
           sender ! Status.Failure(new Exception("Cannot vote for not existing file"))
         else {
-          logger.debug(s"emiting Voted")
+          logger.debug(s"emitting Voted")
           persist(PickVoted(data))(updateStateAndAck)
         }
       }
-      case Create(id, data) => {
-        logger.debug(s"Create recieved $state")
+      case Create(id, data, userId) => {
+        logger.debug(s"Create received $state")
         if (data.size < 2)
           sender ! Status.Failure(new Exception("At least 2 files needed"))
         else if (!state.Votes.isEmpty)
           sender ! Status.Failure(new Exception("Already created"))
         else {
-          logger.debug(s"emiting Created")
-          persist(PickCreated(id, data))(updateStateAndAck)
+          logger.debug(s"emitting Created")
+          persist(PickCreated(id, data, userId))(updateStateAndAck)
           
         }
       }
       case GetResults() =>
-        logger.debug(s"Get results recieved")
-        sender ! state.Votes
+        logger.debug(s"Get results received")
+        sender ! state.Votes.toList
     }
-    private var logger = Logger(LoggerFactory.getLogger(this.getClass))
+    private val logger = Logger(LoggerFactory.getLogger(this.getClass))
   }
 }
